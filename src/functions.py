@@ -1,8 +1,6 @@
 """
 General Functions
 """
-from gevent import monkey; monkey.patch_all()
-
 # import modules
 import os, json, gevent, datetime, redis
 import requests
@@ -39,12 +37,12 @@ def app_info(app_id):
                     info = client.get_product_info(apps=[app_id], timeout=1)
 
                     # add tags
-                    tag_ids = [ v for k,v in info['apps'][app_id]['store_tags'].items() ]
+                    tag_ids = [ v for k,v in info['apps'][app_id]['common']['store_tags'].items() ]
                     tags = tag_info(tag_ids)
 
                     info[ 'apps' ][ app_id ][ 'tags' ] = tags
 
-                    return info['apps'][app_id]
+                    return info
 
             except gevent.timeout.Timeout:
                 client._connecting = False

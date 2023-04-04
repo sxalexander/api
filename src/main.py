@@ -34,7 +34,7 @@ class PrettyJSONResponse(Response):
 
 
 @app.get("/v1/info/{app_id}", response_class=PrettyJSONResponse)
-def read_app(app_id: int, pretty: bool = False):
+def read_app(app_id: int, pretty: bool = True):
     if "CACHE" in os.environ and os.environ["CACHE"]:
         info = cache_read(app_id)
 
@@ -46,7 +46,7 @@ def read_app(app_id: int, pretty: bool = False):
     else:
         info = app_info(app_id)
 
-    if not info["apps"]:
+    if "apps" not in info:
         # return empty result for not found app
         return {"data": {app_id: {}}, "status": "success", "pretty": pretty}
 
@@ -54,7 +54,7 @@ def read_app(app_id: int, pretty: bool = False):
 
 
 @app.get("/v1/version", response_class=PrettyJSONResponse)
-def read_item(pretty: bool = False):
+def read_item(pretty: bool = True):
     # check if version succesfully read and parsed
     if "VERSION" in os.environ and os.environ["VERSION"]:
         return {
