@@ -38,6 +38,12 @@ def app_info(app_id):
                     client.verbose_debug = False
                     info = client.get_product_info(apps=[app_id], timeout=1)
 
+                    # add tags
+                    tag_ids = [ v for k,v in info['apps'][app_id]['store_tags'].items() ]
+                    tags = tag_info(tag_ids)
+
+                    info[ 'apps' ][ app_id ][ 'tags' ] = tags
+
                     return info
 
             except gevent.timeout.Timeout:
