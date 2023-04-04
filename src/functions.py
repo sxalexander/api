@@ -44,7 +44,7 @@ def app_info(app_id):
 
                     info[ 'apps' ][ app_id ][ 'tags' ] = tags
 
-                    return info
+                    return info['apps'][app_id]
 
             except gevent.timeout.Timeout:
                 client._connecting = False
