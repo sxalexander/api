@@ -6,8 +6,7 @@ Main application and entrypoint.
 from deta import Deta
 from typing import Union
 from fastapi import FastAPI, Response, status
-from fastapi.middleware.cors import CORSMiddleware
-from functions import app_info, cache_read, cache_write
+from functions import app_info, cache_read, cache_write, tag_info, category_info
 import os, datetime, json, semver, typing
 
 # load configuration
@@ -17,16 +16,6 @@ load_dotenv()
 
 # initialise app
 app = FastAPI()
-
-origins = [x for x in os.environ.get("ALLOWED_HOSTS", "http://localhost").split(",")]
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 
 
 # include "pretty" for backwards compatibility
@@ -79,3 +68,39 @@ def read_item(pretty: bool = False):
             "data": "Something went wrong while retrieving and parsing the current API version. Please try again later",
             "pretty": pretty,
         }
+
+@app.get("v1/tags/{tag_ids}", response_class=PrettyJSONResponse)
+def read_tags(tag_ids: str, pretty: bool = False):
+    # fetch tag information from steam api
+
+    # split tag ids
+    tag_ids = tag_ids.split(",")
+
+    # get tag_info or return api-formatted error
+    try:
+        tag_info = tag_info(tag_ids)
+    except Exception as err:
+        print("Error while fetching tag info for tag ids: " + ",".join(tag_ids))
+        print(err)
+        return {"data": {}, "status": "error", "pretty": pretty}
+    
+    # return tags
+    return {"data": tag_info, "status": "success", "pretty": pretty}
+
+@app.get("v1/categories/{category_ids}", response_class=PrettyJSONResponse)
+def read_categories(category_ids: str, pretty: bool = False):
+    # fetch category information from steam api
+
+    # split category ids
+    category_ids = category_ids.split(",")
+
+    # get category_info or return api-formatted error
+    try:
+        category_info = category_info(category_ids)
+    except Exception as err:
+        print("Error while fetching category info for category ids: " + ",".join(category_ids))
+        print(err)
+        return {"data": {}, "status": "error", "pretty": pretty}
+    
+    # return categories
+    return {"data": category_info, "status": "success", "pretty": pretty}

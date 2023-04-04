@@ -62,12 +62,13 @@ def tag_info(tag_ids):
     response_tags = []
 
     # check if tag ids are in cache
-    for tag_id in tag_ids:
-        tag = cache_read("tag-{}".format(tag_id))
+    if "CACHE" in os.environ and os.environ["CACHE"]:
+        for tag_id in tag_ids:
+            tag = cache_read("tag-{}".format(tag_id))
 
-        if tag:
-            response_tags.append(tag)
-            tag_ids.remove(tag_id)
+            if tag:
+                response_tags.append(tag)
+                tag_ids.remove(tag_id)
 
     # if all tags are in cache return them
     if not tag_ids:
@@ -95,7 +96,8 @@ def tag_info(tag_ids):
 
         # save each tag to the cache
         for tag in r.json()["response"]["tags"]:
-            cache_write("tag-{}".format(tag["tagid"]), tag)
+            if "CACHE" in os.environ and os.environ["CACHE"]:
+                cache_write("tag-{}".format(tag["tagid"]), tag)
             response_tags.append(tag)
         
     
@@ -107,25 +109,21 @@ def tag_info(tag_ids):
     # return tags
     return response_tags
 
-
-
-
-    
-
 def category_info(category_ids):
     # check if category ids are in cache
     response_categories = []
 
-    for category_id in category_ids:
-        category = cache_read("category-{}".format(category_id))
+    if "CACHE" in os.environ and os.environ["CACHE"]:
+        for category_id in category_ids:
+            category = cache_read("category-{}".format(category_id))
 
-        if category:
-            response_categories.append(category)
-            category_ids.remove(category_id)
+            if category:
+                response_categories.append(category)
+                category_ids.remove(category_id)
 
-    # if all categories are in cache return them
-    if not category_ids:
-        return response_categories
+        # if all categories are in cache return them
+        if not category_ids:
+            return response_categories
     
 
     # Fetch category information from steam api
@@ -146,8 +144,10 @@ def category_info(category_ids):
 
         # save each category to the cache
         for category in r.json()["response"]["categories"]:
-            cache_write("category-{}".format(category["id"]), category)
-            response_categories.append(category)
+            if "CACHE" in os.environ and os.environ["CACHE"]:
+                cache_write("category-{}".format(category["id"]), category)
+            if category["categoryid"] in category_ids:
+                response_categories.append(category)
 
     except Exception as err:
         print("Error while fetching category info for category ids: " + ",".join(category_ids))
